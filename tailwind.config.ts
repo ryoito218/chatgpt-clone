@@ -12,6 +12,9 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      backgroundColor : {
+        "custom-blue": "#222f55",
+      },
     },
   },
   plugins: [],
