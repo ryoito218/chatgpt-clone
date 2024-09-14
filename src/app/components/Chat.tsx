@@ -1,13 +1,43 @@
 "use client";
 
-import { addDoc, collection, doc, serverTimestamp } from "firebase/firestore";
-import React, { useState } from "react"
+import { addDoc, collection, doc, onSnapshot, orderBy, query, serverTimestamp, Timestamp } from "firebase/firestore";
+import React, { useEffect, useState } from "react"
 import { FaPaperPlane } from "react-icons/fa";
 import { db } from "../../../firebase";
+import { useAppContext } from "@/context/AppContext";
+
+type Message = {
+  text: string;
+  sender: string;
+  createdAt: Timestamp;
+};
 
 const Chat = () => {
-
+  const { selectedRoom } = useAppContext();
   const [inputMessage, setInputMessage] = useState<string>("");
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  useEffect(() => {
+    if (selectedRoom) {
+      const fetchMessages = async () => {
+        const roomDocRef = doc(db, "rooms", selectedRoom);
+        const messageCollectionRef = collection(roomDocRef, "messages")
+
+        const q = query(messageCollectionRef, orderBy("createdAt"));
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          const newMessages = snapshot.docs.map((doc) => doc.data() as Message);
+          setMessages(newMessages);
+        });
+  
+        return () => {
+          unsubscribe();
+        };
+      };
+  
+      fetchMessages();
+    }
+  }, [selectedRoom]);
 
   const sendMessage = async () => {
     if (!inputMessage.trim()) return;
@@ -28,16 +58,20 @@ const Chat = () => {
     <div className="bg-gray-500 h-full p-4 flex flex-col">
       <h1 className="text-2xl text-white font-semibold mb-4">Room1</h1>
       <div className="flex-grow overflow-y-auto mb-4">
-        <div className="text-right">
-          <div className="bg-blue-500 inline-block rounded px-4 py-2">
-            <p className="text-white font-medium">Hello</p>
-          </div>
-        </div>
-        <div className="text-left">
-          <div className="bg-green-500 inline-block rounded px-4 py-2">
-            <p className="text-white font-medium">How are you?</p>
-          </div>
-        </div>
+        {messages.map((message, index) => (
+            <div key={index} className={message.sender === "user" ? "text-right" : "text-left"}>
+              <div className={
+                message.sender === "user" 
+                ? "bg-blue-500 inline-block rounded px-4 py-2 mb-2" 
+                : "bg-green-500 inline-block rounded px-4 py-2 mb-2" 
+                }
+              >
+                <p className="text-white">{message.text}</p>
+              </div>
+            </div>
+        ))}
+
+        
       </div>
 
       <div className="flex-shrink-0 relative">

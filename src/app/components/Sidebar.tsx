@@ -5,7 +5,6 @@ import React, { useEffect, useState } from "react"
 import { BiLogOut } from "react-icons/bi";
 import { db } from "../../../firebase";
 import { useAppContext } from "@/context/AppContext";
-import { CgNametag } from "react-icons/cg";
 
 type Room = {
   id: string;
@@ -15,7 +14,7 @@ type Room = {
 
 const Sidebar = () => {
 
-  const {user, userId} = useAppContext();
+  const {user, userId, setSelectedRoom } = useAppContext();
 
   const [rooms, setRooms] = useState<Room[]>([]);
 
@@ -30,7 +29,6 @@ const Sidebar = () => {
             name: doc.data().name,
             createdAt: doc.data().createdAt,
           }));
-          console.log(newRooms);
           setRooms(newRooms);
         });
   
@@ -44,6 +42,10 @@ const Sidebar = () => {
     
   }, [userId]);
 
+  const selectRoom = (roomId: string) => {
+    setSelectedRoom(roomId);
+  }
+
   return (
     <div className="bg-custom-blue h-full overflow-y-auto px-5 flex flex-col">
       <div className="flex-grow">
@@ -53,7 +55,11 @@ const Sidebar = () => {
         </div>
         <ul>
           {rooms.map((room) => (
-            <li className="cursor-pointer border-b p-4 text-slate-100 hover:bg-slate-700 duration-150">
+            <li 
+              key={room.id}
+              className="cursor-pointer border-b p-4 text-slate-100 hover:bg-slate-700 duration-150"
+              onClick={() => selectRoom(room.id)}
+            >
               {room.name}
             </li>
           ))}
