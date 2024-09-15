@@ -14,7 +14,7 @@ type Room = {
 
 const Sidebar = () => {
 
-  const {user, userId, setSelectedRoom } = useAppContext();
+  const {user, userId, setSelectedRoom, setSelectRoomName } = useAppContext();
 
   const [rooms, setRooms] = useState<Room[]>([]);
 
@@ -42,8 +42,9 @@ const Sidebar = () => {
     
   }, [userId]);
 
-  const selectRoom = (roomId: string) => {
+  const selectRoom = (roomId: string, roomName: string) => {
     setSelectedRoom(roomId);
+    setSelectRoomName(roomName);
   }
 
   const addNewRoom = async () => {
@@ -78,7 +79,7 @@ const Sidebar = () => {
             <li 
               key={room.id}
               className="cursor-pointer border-b p-4 text-slate-100 hover:bg-slate-700 duration-150"
-              onClick={() => selectRoom(room.id)}
+              onClick={() => selectRoom(room.id, room.name)}
             >
               {room.name}
             </li>
@@ -86,7 +87,9 @@ const Sidebar = () => {
         </ul>
       </div>
 
-      <div onClick={handleLogout} className="text-lg flex items-center justify-evenly mb-2 cursor-pointer p-4 text-slate-100 hover:bg-slate-700 duration-150">
+      {user && <div className="mb-2 p-4 text-slate-100 text-lg font-medium">{user.email}</div>}
+
+      <div onClick={() => handleLogout()} className="text-lg flex items-center justify-evenly mb-2 cursor-pointer p-4 text-slate-100 hover:bg-slate-700 duration-150">
         <BiLogOut />
         <span>ログアウト</span>
       </div>
